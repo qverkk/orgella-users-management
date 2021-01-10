@@ -31,7 +31,8 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-starter-security")
     implementation("org.modelmapper:modelmapper:2.3.9")
     implementation("io.jsonwebtoken:jjwt:0.9.1")
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.12.0")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.11.3")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")

@@ -1,0 +1,34 @@
+server:
+  port: ${PORT:0}
+spring:
+  rabbitmq:
+    host: ${rabbit.host:localhost}
+    port: ${rabbit.port:5672}
+    username: ${rabbit.username:guest}
+    password: ${rabbit.password:guest}
+  data:
+    mongodb:
+      uri: mongodb://orgella_users:orgella_users_password@users-mongo-primary:27017,users-mongo-node-1:27018,users-mongo-node-2:27019,users-mongo-node-3:27020/my_data?replicaSet=users-replica-set
+  application:
+    name: users-ws
+  devtools:
+    livereload:
+      enabled: true
+
+eureka:
+  instance:
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+  client:
+    service-url:
+      defaultZone: http://localhost:8010/eureka
+logging:
+  file:
+    name: users-ws.log
+login:
+  url:
+    path: /users/login
+authorization:
+  token:
+    header:
+      name: Authorization
+      prefix: Bearer
