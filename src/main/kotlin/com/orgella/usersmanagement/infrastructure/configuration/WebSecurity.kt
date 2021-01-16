@@ -30,7 +30,8 @@ class WebSecurity(
             .addFilter(getAuthenticationFilter())
             .addFilter(AuthorizationFilter(
                 authenticationManager(),
-                environment
+                environment,
+                usersService
             ))
         http.headers().frameOptions().disable()
     }

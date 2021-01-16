@@ -10,7 +10,7 @@ import java.util.*
 @Primary
 class MongoUserRepository(
     val usersRepository: SpringDataMongoUsersRepository
-): UserRepository {
+) : UserRepository {
 
     override fun findById(id: UUID): Optional<UserEntity> {
         return usersRepository.findById(id)
@@ -21,7 +21,6 @@ class MongoUserRepository(
     }
 
     override fun save(userEntity: UserEntity) {
-        println("Saving to mongo db $userEntity")
         usersRepository.save(userEntity)
     }
 

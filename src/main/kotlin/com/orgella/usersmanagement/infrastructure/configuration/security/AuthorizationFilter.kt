@@ -1,18 +1,22 @@
 package com.orgella.usersmanagement.infrastructure.configuration.security
 
+import com.orgella.usersmanagement.domain.service.UserDetailsImpl
+import com.orgella.usersmanagement.domain.service.UserService
 import io.jsonwebtoken.Jwts
 import org.springframework.core.env.Environment
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter
+import java.util.*
 import javax.servlet.FilterChain
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 class AuthorizationFilter(
     authManager: AuthenticationManager,
-    private val env: Environment
+    private val env: Environment,
+    private val userService: UserService
 ) : BasicAuthenticationFilter(authManager) {
 
     override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, chain: FilterChain) {
@@ -44,6 +48,10 @@ class AuthorizationFilter(
             .body
             .subject ?: return null
 
-        return UsernamePasswordAuthenticationToken(userId, null, emptyList())
+        val user = userService.findUserByUUID(UUID.fromString(userId)).orElseGet { null } ?: return null
+
+        val userDetails = UserDetailsImpl.build(user)
+
+        return UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)
     }
 }

@@ -11,5 +11,6 @@ data class UserEntity(
     var email: String,
     var password: String,
     var enabled: Boolean,
-    var locked: Boolean
+    var locked: Boolean,
+    var roles: MutableSet<RoleEntity>
 )

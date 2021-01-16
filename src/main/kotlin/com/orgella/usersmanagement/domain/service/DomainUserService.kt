@@ -1,5 +1,6 @@
 package com.orgella.usersmanagement.domain.service
 
+import com.orgella.usersmanagement.domain.RoleEntity
 import com.orgella.usersmanagement.domain.UserEntity
 import com.orgella.usersmanagement.domain.repository.UserRepository
 import org.springframework.security.core.userdetails.User
@@ -34,6 +35,17 @@ class DomainUserService(
 
     override fun findUserByUsername(username: String): Optional<UserEntity> {
         return userRepository.findByUsername(username)
+    }
+
+    override fun findUserByUUID(uuid: UUID): Optional<UserEntity> {
+        return userRepository.findById(uuid)
+    }
+
+    override fun addRoleForUsername(role: RoleEntity, username: String) {
+        userRepository.findByUsername(username).ifPresent {
+            it.roles.add(role)
+            userRepository.save(it)
+        }
     }
 
     override fun loadUserByUsername(username: String): UserDetails {
