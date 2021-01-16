@@ -53,6 +53,7 @@ class AuthenticationFilter(
         user.ifPresent {
             val token = Jwts.builder()
                 .setSubject(it.id.toString())
+                .claim("roles", it.roles.map { role -> role.name }.joinToString(separator = ",", prefix = "[", postfix = "]"))
                 .setExpiration(
                     Date(
                         System.currentTimeMillis() + env.getProperty("token.expiration_time")!!.toLong()
@@ -63,6 +64,7 @@ class AuthenticationFilter(
 
             response.addHeader("token", token)
             response.addHeader("userId", it.id.toString())
+            response.addHeader("roles", it.roles.map { role -> role.name }.joinToString(separator = ",", prefix = "[", postfix = "]"))
         }
     }
 }
