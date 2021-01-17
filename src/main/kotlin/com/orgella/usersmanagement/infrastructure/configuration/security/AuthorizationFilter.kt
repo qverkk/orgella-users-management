@@ -10,6 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter
 import java.util.*
 import javax.servlet.FilterChain
+import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -20,9 +21,17 @@ class AuthorizationFilter(
 ) : BasicAuthenticationFilter(authManager) {
 
     override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, chain: FilterChain) {
-        val authorizationHeader: String? = request.getHeader(env.getProperty("authorization.token.header.name"))
+//        val authorizationHeader: String? = request.getHeader(env.getProperty("authorization.token.header.name"))
+//
+//        if (authorizationHeader == null || !authorizationHeader.startsWith(env.getProperty("authorization.token.header.prefix")!!)) {
+//            chain.doFilter(request, response)
+//            return
+//        }
 
-        if (authorizationHeader == null || !authorizationHeader.startsWith(env.getProperty("authorization.token.header.prefix")!!)) {
+        val cookies: Array<out Cookie>? = request.cookies
+        val cookie: Cookie? = cookies?.first { it.name == "UserInfo" }
+
+        if (cookie == null) {
             chain.doFilter(request, response)
             return
         }
@@ -35,16 +44,22 @@ class AuthorizationFilter(
 
     fun getAuthentication(request: HttpServletRequest): UsernamePasswordAuthenticationToken? {
 
-        val authorizationHeader = request.getHeader(env.getProperty("authorization.token.header.name")) ?: return null
-
-        val token = authorizationHeader.replace(
-            env.getProperty("authorization.token.header.prefix")!!,
-            ""
-        )
-
+//        val authorizationHeader = request.getHeader(env.getProperty("authorization.token.header.name")) ?: return null
+//
+//        val token = authorizationHeader.replace(
+//            env.getProperty("authorization.token.header.prefix")!!,
+//            ""
+//        )
+//
+//        val userId = Jwts.parser()
+//            .setSigningKey(env.getProperty("token.secret"))
+//            .parseClaimsJws(token)
+//            .body
+//            .subject ?: return null
+        val cookie = request.cookies.first { it.name == "UserInfo" }
         val userId = Jwts.parser()
             .setSigningKey(env.getProperty("token.secret"))
-            .parseClaimsJws(token)
+            .parseClaimsJws(cookie.value)
             .body
             .subject ?: return null
 

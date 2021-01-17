@@ -5,7 +5,7 @@ import com.orgella.usersmanagement.domain.RoleEntity
 import org.springframework.data.mongodb.repository.MongoRepository
 import java.util.*
 
-interface SpringDateMongoRoleRepository : MongoRepository<RoleEntity, Long> {
+interface SpringDateMongoRoleRepository : MongoRepository<RoleEntity, UUID> {
 
     fun findByName(name: ERole): Optional<RoleEntity>
 }

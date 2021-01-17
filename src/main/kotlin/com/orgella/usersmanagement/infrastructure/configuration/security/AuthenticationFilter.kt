@@ -11,8 +11,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import java.time.Duration
+import java.time.temporal.ChronoUnit
 import java.util.*
 import javax.servlet.FilterChain
+import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
@@ -53,7 +56,10 @@ class AuthenticationFilter(
         user.ifPresent {
             val token = Jwts.builder()
                 .setSubject(it.id.toString())
-                .claim("roles", it.roles.map { role -> role.name }.joinToString(separator = ",", prefix = "[", postfix = "]"))
+                .claim(
+                    "roles",
+                    it.roles.map { role -> role.name }.joinToString(separator = ",", prefix = "[", postfix = "]")
+                )
                 .setExpiration(
                     Date(
                         System.currentTimeMillis() + env.getProperty("token.expiration_time")!!.toLong()
@@ -62,9 +68,12 @@ class AuthenticationFilter(
                 .signWith(SignatureAlgorithm.HS512, env.getProperty("token.secret"))
                 .compact()
 
-            response.addHeader("token", token)
-            response.addHeader("userId", it.id.toString())
-            response.addHeader("roles", it.roles.map { role -> role.name }.joinToString(separator = ",", prefix = "[", postfix = "]"))
+            val userInfoCookie = Cookie("UserInfo", token)
+            userInfoCookie.path = "/"
+            userInfoCookie.isHttpOnly = true
+            userInfoCookie.maxAge = Duration.of(env.getProperty("token.expiration_time")!!.toLong(), ChronoUnit.MILLIS).toSeconds().toInt()
+            response.addCookie(userInfoCookie)
+//            response.addHeader("token", token)
         }
     }
 }
