@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import java.time.Duration
+import java.time.Instant
 import java.time.temporal.ChronoUnit
 import java.util.*
 import javax.servlet.FilterChain
@@ -60,10 +61,12 @@ class AuthenticationFilter(
                     "roles",
                     it.roles.map { role -> role.name }.joinToString(separator = ",", prefix = "[", postfix = "]")
                 )
+                .claim(
+                    "username",
+                    it.username
+                )
                 .setExpiration(
-                    Date(
-                        System.currentTimeMillis() + env.getProperty("token.expiration_time")!!.toLong()
-                    )
+                    Date.from(Instant.now().plusSeconds(env.getProperty("token.expiration_time")!!.toLong()))
                 )
                 .signWith(SignatureAlgorithm.HS512, env.getProperty("token.secret"))
                 .compact()
@@ -71,7 +74,8 @@ class AuthenticationFilter(
             val userInfoCookie = Cookie("UserInfo", token)
             userInfoCookie.path = "/"
             userInfoCookie.isHttpOnly = true
-            userInfoCookie.maxAge = Duration.of(env.getProperty("token.expiration_time")!!.toLong(), ChronoUnit.MILLIS).toSeconds().toInt()
+            userInfoCookie.maxAge =
+                Duration.of(env.getProperty("token.expiration_time")!!.toLong(), ChronoUnit.SECONDS).toSeconds().toInt()
             response.addCookie(userInfoCookie)
 //            response.addHeader("token", token)
         }

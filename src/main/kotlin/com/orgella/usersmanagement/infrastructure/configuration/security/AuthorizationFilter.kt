@@ -29,8 +29,12 @@ class AuthorizationFilter(
 //        }
 
         val cookies: Array<out Cookie>? = request.cookies
-        val cookie: Cookie? = cookies?.first { it.name == "UserInfo" }
+        if (cookies == null) {
+            chain.doFilter(request, response)
+            return
+        }
 
+        val cookie = cookies.toList().stream().filter { it.name == "UserInfo" }.findFirst().orElseGet { null }
         if (cookie == null) {
             chain.doFilter(request, response)
             return
@@ -56,7 +60,7 @@ class AuthorizationFilter(
 //            .parseClaimsJws(token)
 //            .body
 //            .subject ?: return null
-        val cookie = request.cookies.first { it.name == "UserInfo" }
+        val cookie = request.cookies.toList().stream().filter { it.name == "UserInfo" }.findFirst().orElseGet { null }
         val userId = Jwts.parser()
             .setSigningKey(env.getProperty("token.secret"))
             .parseClaimsJws(cookie.value)
