@@ -28,11 +28,16 @@ class WebSecurity(
             .anyRequest().authenticated()
             .and()
             .addFilter(getAuthenticationFilter())
-            .addFilter(AuthorizationFilter(
-                authenticationManager(),
-                environment,
-                usersService
-            ))
+            .addFilter(
+                AuthorizationFilter(
+                    authenticationManager(),
+                    environment,
+                    usersService
+                )
+            )
+            .logout()
+            .logoutUrl("/users/logout")
+            .deleteCookies("UserInfo")
         http.headers().frameOptions().disable()
     }
 
