@@ -8,12 +8,15 @@ import com.orgella.usersmanagement.application.response.UserDetailsResponse
 import com.orgella.usersmanagement.domain.ERole
 import com.orgella.usersmanagement.domain.RoleEntity
 import com.orgella.usersmanagement.domain.service.RoleService
+import com.orgella.usersmanagement.domain.service.UserDetailsImpl
 import com.orgella.usersmanagement.domain.service.UserService
+import com.orgella.usersmanagement.exceptions.CannotProcessCurrentUserException
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.web.bind.annotation.*
 import java.util.*
 import javax.validation.Valid
@@ -72,6 +75,24 @@ class UserController(
                 user.firstName,
                 user.lastName,
                 user.dateOfBirth
+            )
+        )
+    }
+
+    @GetMapping("/me", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun getCurrentUserDetails(authentication: Authentication): ResponseEntity<UserDetailsResponse> {
+        val user = authentication.principal as UserDetailsImpl
+        val userEntity = userService.findUserByUsername(user.username).orElseThrow {
+            throw CannotProcessCurrentUserException("Sorry, we can't process your request at the moment.")
+        }
+
+        return ResponseEntity.ok(
+            UserDetailsResponse(
+                userEntity.id,
+                userEntity.email,
+                userEntity.firstName,
+                userEntity.lastName,
+                userEntity.dateOfBirth
             )
         )
     }

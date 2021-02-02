@@ -5,12 +5,14 @@ import com.orgella.usersmanagement.infrastructure.configuration.security.Authent
 import com.orgella.usersmanagement.infrastructure.configuration.security.AuthorizationFilter
 import org.springframework.core.env.Environment
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler
 
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
@@ -36,8 +38,9 @@ class WebSecurity(
                 )
             )
             .logout()
-            .logoutUrl("/users/logout")
+            .invalidateHttpSession(true)
             .deleteCookies("UserInfo")
+            .logoutSuccessHandler((HttpStatusReturningLogoutSuccessHandler(HttpStatus.OK)));
         http.headers().frameOptions().disable()
     }
 
