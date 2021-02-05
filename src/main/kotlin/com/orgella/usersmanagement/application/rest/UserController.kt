@@ -35,7 +35,7 @@ class UserController(
         if (role == null) {
             role = roleService.addRole(
                 RoleEntity(
-                    UUID.randomUUID(), ERole.ROLE_USER
+                    UUID.randomUUID(), ERole.ROLE_USER, 0
                 )
             )
         }
@@ -56,7 +56,7 @@ class UserController(
         if (role == null) {
             role = roleService.addRole(
                 RoleEntity(
-                    UUID.randomUUID(), ERole.valueOf(addRoleRequest.roleName)
+                    UUID.randomUUID(), ERole.valueOf(addRoleRequest.roleName), 0
                 )
             )
         }

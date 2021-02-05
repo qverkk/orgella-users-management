@@ -16,6 +16,7 @@ fun CreateUserRequest.toDomain(): UserEntity {
         this.password,
         enabled = true,
         locked = false,
-        roles = mutableSetOf()
+        roles = mutableSetOf(),
+        version = 0
     )
 }
