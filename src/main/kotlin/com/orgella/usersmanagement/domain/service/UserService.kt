@@ -20,4 +20,8 @@ interface UserService : UserDetailsService {
     fun lockUser(id: UUID)
 
     fun unlockUser(id: UUID)
+
+    fun findAll(): List<UserEntity>
+
+    fun removeRoleForUsername(role: RoleEntity, username: String)
 }

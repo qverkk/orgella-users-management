@@ -10,14 +10,19 @@ import feign.Logger
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
+import org.springframework.core.env.Environment
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 
 @Configuration
 class BeanConfiguration {
 
     @Bean
-    fun userService(userRepository: UserRepository): UserService {
-        return DomainUserService(userRepository, bCryptPasswordEncoder())
+    fun userService(
+        userRepository: UserRepository,
+        roleRepository: RoleRepository,
+        environment: Environment
+    ): UserService {
+        return DomainUserService(userRepository, roleRepository, bCryptPasswordEncoder(), environment)
     }
 
     @Bean

@@ -1,18 +1,62 @@
 package com.orgella.usersmanagement.domain.service
 
+import com.orgella.usersmanagement.domain.ERole
 import com.orgella.usersmanagement.domain.RoleEntity
 import com.orgella.usersmanagement.domain.UserEntity
+import com.orgella.usersmanagement.domain.repository.RoleRepository
 import com.orgella.usersmanagement.domain.repository.UserRepository
+import org.springframework.core.env.Environment
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
 import java.util.*
+import javax.annotation.PostConstruct
 
 class DomainUserService(
     private val userRepository: UserRepository,
-    private val passwordEncoder: PasswordEncoder
+    private val roleRepository: RoleRepository,
+    private val passwordEncoder: PasswordEncoder,
+    private val environment: Environment
 ) : UserService {
+
+    @PostConstruct
+    fun initAdminAccount() {
+        val adminUser = userRepository.findByUsername(environment.getProperty("admin.username")!!).orElse(null)
+        if (adminUser != null
+            || environment.getProperty("admin.username") == null
+            || environment.getProperty("admin.password") == null
+        ) {
+            return
+        }
+
+        var adminRole = roleRepository.findByName(ERole.ROLE_ADMIN.name).orElse(null)
+        if (adminRole == null) {
+            adminRole = roleRepository.save(
+                RoleEntity(
+                    UUID.randomUUID(),
+                    ERole.ROLE_ADMIN,
+                    0
+                )
+            )
+        }
+
+        userRepository.save(
+            UserEntity(
+                UUID.randomUUID(),
+                "Admin",
+                "Admin",
+                Date(),
+                environment.getProperty("admin.username")!!,
+                "admin@orgella.com",
+                passwordEncoder.encode(environment.getProperty("admin.password")!!),
+                enabled = true,
+                locked = false,
+                roles = mutableSetOf(adminRole),
+                version = 0
+            )
+        )
+    }
 
     override fun addUser(userEntity: UserEntity) {
         if (userRepository.findByUsernameOrEmail(userEntity.username, userEntity.email).isPresent) {
@@ -76,5 +120,16 @@ class DomainUserService(
             }, {
                 throw UserIdDoesntExistException(id)
             })
+    }
+
+    override fun findAll(): List<UserEntity> {
+        return userRepository.findAll()
+    }
+
+    override fun removeRoleForUsername(role: RoleEntity, username: String) {
+        userRepository.findByUsername(username).ifPresent {
+            it.roles.remove(role)
+            userRepository.save(it)
+        }
     }
 }

@@ -27,4 +27,8 @@ class MongoUserRepository(
     override fun findByUsername(username: String): Optional<UserEntity> {
         return usersRepository.findByUsername(username)
     }
+
+    override fun findAll(): List<UserEntity> {
+        return usersRepository.findAll()
+    }
 }

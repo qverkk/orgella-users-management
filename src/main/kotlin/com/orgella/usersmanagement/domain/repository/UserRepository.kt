@@ -12,4 +12,6 @@ interface UserRepository {
     fun save(userEntity: UserEntity)
 
     fun findByUsername(username: String): Optional<UserEntity>
+
+    fun findAll(): List<UserEntity>
 }

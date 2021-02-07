@@ -3,7 +3,10 @@ package com.orgella.usersmanagement.application.rest
 import com.orgella.usersmanagement.application.mappers.toDomain
 import com.orgella.usersmanagement.application.request.AddRoleRequest
 import com.orgella.usersmanagement.application.request.CreateUserRequest
+import com.orgella.usersmanagement.application.request.RemoveRoleRequest
 import com.orgella.usersmanagement.application.response.CreateUserResponse
+import com.orgella.usersmanagement.application.response.GetAllRolesResponse
+import com.orgella.usersmanagement.application.response.GetAllUsersDetailsResponse
 import com.orgella.usersmanagement.application.response.UserDetailsResponse
 import com.orgella.usersmanagement.domain.ERole
 import com.orgella.usersmanagement.domain.RoleEntity
@@ -16,7 +19,6 @@ import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.Authentication
-import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.web.bind.annotation.*
 import java.util.*
 import javax.validation.Valid
@@ -63,6 +65,49 @@ class UserController(
         userService.addRoleForUsername(role, addRoleRequest.username)
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping(value = ["/removeRole"], consumes = [MediaType.APPLICATION_JSON_VALUE])
+    fun removeRole(@RequestBody removeRoleRequest: RemoveRoleRequest) {
+        var role = roleService.findRoleByName(removeRoleRequest.roleName).orElseGet { null }
+        if (role == null) {
+            role = roleService.addRole(
+                RoleEntity(
+                    UUID.randomUUID(), ERole.valueOf(removeRoleRequest.roleName), 0
+                )
+            )
+        }
+
+        userService.removeRoleForUsername(role, removeRoleRequest.username)
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/roles/all", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun getAllAvailableRoles(): ResponseEntity<GetAllRolesResponse> {
+        return ResponseEntity.ok(GetAllRolesResponse(ERole.values().map { it.name }))
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/users/all", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun getAllUsersDetails(): ResponseEntity<GetAllUsersDetailsResponse> {
+        val users = userService.findAll()
+
+        return ResponseEntity.ok(
+            GetAllUsersDetailsResponse(
+                users.map {
+                    UserDetailsResponse(
+                        it.id,
+                        it.username,
+                        it.email,
+                        it.firstName,
+                        it.lastName,
+                        it.dateOfBirth,
+                        it.roles.map { role -> role.name.name }
+                    )
+                }
+            )
+        )
+    }
+
     @PreAuthorize("#username == authentication.principal.username")
     @GetMapping(value = ["/{username}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun getUserDetailsByUsername(@PathVariable username: String): ResponseEntity<UserDetailsResponse>? {
@@ -71,10 +116,12 @@ class UserController(
         return ResponseEntity.ok(
             UserDetailsResponse(
                 user.id,
+                user.username,
                 user.email,
                 user.firstName,
                 user.lastName,
-                user.dateOfBirth
+                user.dateOfBirth,
+                user.roles.map { it.name.name }
             )
         )
     }
@@ -89,10 +136,12 @@ class UserController(
         return ResponseEntity.ok(
             UserDetailsResponse(
                 userEntity.id,
+                userEntity.username,
                 userEntity.email,
                 userEntity.firstName,
                 userEntity.lastName,
-                userEntity.dateOfBirth
+                userEntity.dateOfBirth,
+                userEntity.roles.map { it.name.name }
             )
         )
     }
