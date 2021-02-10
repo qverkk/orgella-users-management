@@ -3,6 +3,8 @@ package com.orgella.usersmanagement.infrastructure.repository.mongo
 import com.orgella.usersmanagement.domain.UserEntity
 import com.orgella.usersmanagement.domain.repository.UserRepository
 import org.springframework.context.annotation.Primary
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Component
 import java.util.*
 
@@ -28,7 +30,8 @@ class MongoUserRepository(
         return usersRepository.findByUsername(username)
     }
 
-    override fun findAll(): List<UserEntity> {
-        return usersRepository.findAll()
+    override fun findAll(page: Int): Page<UserEntity> {
+        val pageable = PageRequest.of(page, 20)
+        return usersRepository.findAll(pageable)
     }
 }

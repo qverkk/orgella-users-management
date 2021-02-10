@@ -6,6 +6,7 @@ import com.orgella.usersmanagement.domain.UserEntity
 import com.orgella.usersmanagement.domain.repository.RoleRepository
 import com.orgella.usersmanagement.domain.repository.UserRepository
 import org.springframework.core.env.Environment
+import org.springframework.data.domain.Page
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UsernameNotFoundException
@@ -122,8 +123,8 @@ class DomainUserService(
             })
     }
 
-    override fun findAll(): List<UserEntity> {
-        return userRepository.findAll()
+    override fun findAll(page: Int): Page<UserEntity> {
+        return userRepository.findAll(page)
     }
 
     override fun removeRoleForUsername(role: RoleEntity, username: String) {

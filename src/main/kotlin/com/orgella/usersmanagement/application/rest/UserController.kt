@@ -88,12 +88,16 @@ class UserController(
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/users/all", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getAllUsersDetails(): ResponseEntity<GetAllUsersDetailsResponse> {
-        val users = userService.findAll()
+    fun getAllUsersDetails(
+        @RequestParam(defaultValue = "0") page: Int
+    ): ResponseEntity<GetAllUsersDetailsResponse> {
+        val users = userService.findAll(page)
 
         return ResponseEntity.ok(
             GetAllUsersDetailsResponse(
-                users.map {
+                users.number,
+                users.totalPages,
+                users.content.map {
                     UserDetailsResponse(
                         it.id,
                         it.username,

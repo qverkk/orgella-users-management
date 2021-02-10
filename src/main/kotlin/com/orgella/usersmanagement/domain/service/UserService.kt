@@ -2,6 +2,7 @@ package com.orgella.usersmanagement.domain.service
 
 import com.orgella.usersmanagement.domain.RoleEntity
 import com.orgella.usersmanagement.domain.UserEntity
+import org.springframework.data.domain.Page
 import org.springframework.security.core.userdetails.UserDetailsService
 import java.util.*
 
@@ -21,7 +22,7 @@ interface UserService : UserDetailsService {
 
     fun unlockUser(id: UUID)
 
-    fun findAll(): List<UserEntity>
+    fun findAll(page: Int): Page<UserEntity>
 
     fun removeRoleForUsername(role: RoleEntity, username: String)
 }

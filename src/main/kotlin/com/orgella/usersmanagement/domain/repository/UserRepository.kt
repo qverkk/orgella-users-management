@@ -1,6 +1,7 @@
 package com.orgella.usersmanagement.domain.repository
 
 import com.orgella.usersmanagement.domain.UserEntity
+import org.springframework.data.domain.Page
 import java.util.*
 
 interface UserRepository {
@@ -13,5 +14,5 @@ interface UserRepository {
 
     fun findByUsername(username: String): Optional<UserEntity>
 
-    fun findAll(): List<UserEntity>
+    fun findAll(page: Int): Page<UserEntity>
 }
